@@ -1,21 +1,9 @@
-// Simple API functions using fetch
-const API_BASE_URL = 'https://gvm-assignmment-blogpost.onrender.com/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
-// Get auth token from localStorage
-const getAuthToken = () => {
-    return localStorage.getItem('authToken');
-};
+const getAuthToken = () => localStorage.getItem('token');
+const setAuthToken = (token) => localStorage.setItem('token', token);
+const removeAuthToken = () => localStorage.removeItem('token');
 
-// Set auth token in localStorage
-export const setAuthToken = (token) => {
-    if (token) {
-        localStorage.setItem('authToken', token);
-    } else {
-        localStorage.removeItem('authToken');
-    }
-};
-
-// Get auth headers
 const getAuthHeaders = () => {
     const token = getAuthToken();
     return {
@@ -24,21 +12,16 @@ const getAuthHeaders = () => {
     };
 };
 
-// Get all posts
 export const getPosts = async () => {
     try {
-        const response = await fetch(`${API_BASE_URL}/posts`, {
-            headers: getAuthHeaders()
-        });
+        const response = await fetch(`${API_BASE_URL}/posts`);
         const data = await response.json();
         return data.success ? data.data : [];
     } catch (error) {
-        console.error('Error fetching posts:', error);
         return [];
     }
 };
 
-// Create a new post (requires authentication)
 export const createPost = async (postData) => {
     try {
         const response = await fetch(`${API_BASE_URL}/posts`, {
@@ -46,37 +29,42 @@ export const createPost = async (postData) => {
             headers: getAuthHeaders(),
             body: JSON.stringify(postData),
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
-        console.error('Error creating post:', error);
         return { success: false, message: 'Failed to create post' };
     }
 };
 
-// Delete a post (requires authentication)
+export const updatePost = async (id, postData) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(postData),
+        });
+        return await response.json();
+    } catch (error) {
+        return { success: false, message: 'Failed to update post' };
+    }
+};
+
 export const deletePost = async (id) => {
     try {
         const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
             method: 'DELETE',
             headers: getAuthHeaders(),
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
-        console.error('Error deleting post:', error);
         return { success: false, message: 'Failed to delete post' };
     }
 };
 
-// Authentication API calls
 export const signup = async (userData) => {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/signup`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData),
         });
         const data = await response.json();
@@ -87,7 +75,6 @@ export const signup = async (userData) => {
 
         return data;
     } catch (error) {
-        console.error('Error signing up:', error);
         return { success: false, message: 'Failed to sign up' };
     }
 };
@@ -109,25 +96,36 @@ export const login = async (credentials) => {
 
         return data;
     } catch (error) {
-        console.error('Error logging in:', error);
         return { success: false, message: 'Failed to log in' };
     }
 };
 
 export const logout = () => {
-    setAuthToken(null);
+    removeAuthToken();
 };
 
-export const getCurrentUser = async () => {
+export const likePost = async (postId) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/me`, {
-            headers: getAuthHeaders()
+        const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
         });
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
-        console.error('Error getting current user:', error);
-        return { success: false, message: 'Failed to get user data' };
+        return { success: false, message: 'Failed to like post' };
+    }
+};
+
+export const addComment = async (postId, content) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ content }),
+        });
+        return await response.json();
+    } catch (error) {
+        return { success: false, message: 'Failed to add comment' };
     }
 };
 

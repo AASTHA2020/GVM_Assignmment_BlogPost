@@ -1,11 +1,14 @@
 import BlogPage from './components/BlogPage'
 import './App.css'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 function App() {
   return (
-    <div className="App">
-      <BlogPage />
-    </div>
+    <ThemeProvider>
+      <div className="App">
+        <BlogPage />
+      </div>
+    </ThemeProvider>
   )
 }
 

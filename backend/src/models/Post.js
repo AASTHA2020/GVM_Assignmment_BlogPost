@@ -1,17 +1,51 @@
 import mongoose from "mongoose";
 
-const postSchema = mongoose.Schema({
-  title: String,
-  content: String,
-  username: String,
-  tags: [String],
+const commentSchema = new mongoose.Schema({
+  author: {
+    type: String,
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  },
   createdAt: {
     type: Date,
-    default: new Date(),
-  },
+    default: Date.now
+  }
 });
 
-const PostMessage = mongoose.model("PostMessage", postSchema);
+const postSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  author: {
+    type: String,
+    required: true
+  },
+  tags: [String],
+  image: {
+    type: String,
+    default: null
+  },
+  likes: [{
+    type: String
+  }],
+  comments: [commentSchema]
+}, {
+  timestamps: true
+});
 
-export default PostMessage;
+const Post = mongoose.model("Post", postSchema);
+
+export default Post;
 

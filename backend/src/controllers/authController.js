@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const JWT_SECRET = 'simple-secret-key';
-
-// Simple signup
 export const signup = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -15,7 +12,6 @@ export const signup = async (req, res) => {
             });
         }
 
-        // Check if user exists
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(400).json({
@@ -24,12 +20,10 @@ export const signup = async (req, res) => {
             });
         }
 
-        // Create user
         const user = new User({ username, password });
         await user.save();
 
-        // Create token
-        const token = jwt.sign({ userId: user._id, username }, JWT_SECRET);
+        const token = jwt.sign({ userId: user._id, username }, process.env.JWT_SECRET);
 
         res.json({
             success: true,
@@ -38,14 +32,15 @@ export const signup = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Signup error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error creating user'
+            message: 'Error creating user',
+            error: error.message
         });
     }
 };
 
-// Simple login
 export const login = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -57,7 +52,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // Find user
         const user = await User.findOne({ username });
         if (!user) {
             return res.status(401).json({
@@ -66,7 +60,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // Check password
         const isValid = await user.comparePassword(password);
         if (!isValid) {
             return res.status(401).json({
@@ -75,8 +68,7 @@ export const login = async (req, res) => {
             });
         }
 
-        // Create token
-        const token = jwt.sign({ userId: user._id, username }, JWT_SECRET);
+        const token = jwt.sign({ userId: user._id, username }, process.env.JWT_SECRET);
 
         res.json({
             success: true,
@@ -85,9 +77,11 @@ export const login = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({
             success: false,
-            message: 'Error during login'
+            message: 'Error during login',
+            error: error.message
         });
     }
 };
